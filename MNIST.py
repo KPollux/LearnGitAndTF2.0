@@ -2,7 +2,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 
-
+#%%
 datapath = r'D:\HomePC\dataset\mnist.npz'
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data(datapath)
 
@@ -25,6 +25,7 @@ val_loss, val_acc = model.evaluate(x_test, y_test)
 print(val_loss)
 print(val_acc)
 
+#%%
 i = 103
 plt.imshow(x_test[i], cmap=plt.cm.binary)
 plt.show()
