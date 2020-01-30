@@ -6,4 +6,6 @@
 
 [2] [TensorFlow2.x 官方教程](https://tensorflow.google.cn/tutorials/)
 
-[3] [Keras官方文档](https://keras.io/zh/)
+[3] [Keras 官方文档](https://keras.io/zh/)
+
+[4] [matplotlib.pyplot 官方文档](https://matplotlib.org/index.html)
