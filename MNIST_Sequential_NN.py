@@ -2,7 +2,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 
-#%%
+#%% 定义模型
 datapath = r'D:\HomePC\dataset\mnist.npz'
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data(datapath)
 
@@ -13,6 +13,7 @@ model = tf.keras.models.Sequential()
 model.add(tf.keras.layers.Flatten())
 model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
 model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
+model.add(tf.keras.layers.Dropout(0.2))
 model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
 
 model.compile(optimizer='adam',
