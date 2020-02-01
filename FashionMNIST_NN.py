@@ -45,7 +45,7 @@ for i in range(25):
     plt.xticks([])  # 指定x轴的刻度显示（不显示）
     plt.yticks([])
     plt.imshow(train_images[i], cmap=plt.cm.binary)
-    plt.xlabel(classnames[train_labels[i]])
+    plt.xlabel(class_names[train_labels[i]])
 plt.show()
 
 # %% 建立keras模型
