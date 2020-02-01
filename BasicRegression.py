@@ -66,7 +66,7 @@ train_stats = train_stats.transpose()
 train_stats
 # %% 从标签中分离想要预测的特征
 train_labels = train_dataset.pop('MPG')
-test_labels = test_dataset.pop('MPG')
+test_labels = test_dataset.pop('MPG')  # 带序号的数据
 
 
 # %% 数据预处理2：归一化
@@ -110,8 +110,10 @@ class PrintDot(keras.callbacks.Callback):
             print('')
         print('.', end='')
 
+
 EPOCH = 1000
 # 使用history对象存储训练进度
+# %%
 history = model.fit(
     normed_train_data, train_labels,
     epochs=EPOCH, validation_split=0.2, verbose=0,
@@ -122,4 +124,108 @@ hist = pd.DataFrame(history.history)
 hist['epoch'] = history.epoch
 hist.tail()
 
+
 # %% 训练过程数据可视化
+def plot_history(history):
+    hist = pd.DataFrame(history.history)
+    hist['epoch'] = history.epoch
+
+    # 绘制训练集与测试集的平均绝对误差图像
+    plt.figure()
+    plt.xlabel('Epoch')
+    plt.ylabel('Mean Abs Error [MPG]')
+    plt.plot(hist['epoch'], hist['mae'],
+             label='Train Error')  # 以批次为横坐标，mae为纵坐标，并制定图例名称
+    plt.plot(hist['epoch'], hist['val_mae'],
+             label='Val Error')
+    plt.ylim([0, 5])
+    plt.legend()  # 加上图例
+
+    # 绘制训练集与测试集的均方误差图像
+    plt.figure()
+    plt.xlabel('Epoch')
+    plt.ylabel('Mean Square Error [$MPG^2$]')
+    plt.plot(hist['epoch'], hist['mse'],
+             label='Train Error')
+    plt.plot(hist['epoch'], hist['val_mse'],
+             label='Val Error')
+    plt.ylim([0, 20])
+    plt.legend()
+    plt.show()
+
+
+# %%
+plot_history(history)
+
+# %% 改进
+# 从验证图像中可知，100个epoch之后验证集的误差非但没有改进，还出现了恶化
+# （猜测产生了过拟合）
+# 在这里更新model.fit的调用，当验证值没有提高时，使用回调函数自动停止训练
+
+model = build_model()
+
+# patience 值用于检查改进 epochs 的数量
+# 10个epoch都没有改进，则停止
+early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)
+
+history = model.fit(
+    normed_train_data, train_labels,
+    epochs=EPOCH, validation_split=0.2, verbose=0,
+    callbacks=[early_stop, PrintDot()]
+)
+
+# %%
+plot_history(history)
+
+# %% 验证模型
+loss, mae, mse = model.evaluate(normed_test_data, test_labels, verbose=2)
+
+print("Testing set Mean Abs Error: {:5.2f} MPG".format(mae))
+
+# %% 拟合测试集数据
+test_predictions = model.predict(normed_test_data).flatten()
+
+plt.scatter(test_labels, test_predictions)
+plt.xlabel('True Values [MPG]')
+plt.ylabel('Predictions [MPG]')
+plt.axis('equal')
+plt.axis('square')
+# print(plt.xlim()) 会根据实际数据自动给定上下限
+plt.xlim([0, plt.xlim()[1]])  # 取实际上限，下限置0较为美观
+plt.ylim([0, plt.ylim()[1]])
+plt.plot([-100, 100], [-100, 100], label="baseline")
+plt.legend()
+
+plt.show()
+# %% 查看误差分布
+error = test_predictions - test_labels  # 由于test_labels带序号，故error带序号
+print(error)
+plt.hist(error, bins=25)  # bins为hist宽度
+plt.xlabel("Prediction Error [MPG]")
+plt.ylabel("Count")
+
+plt.show()
+
+
+# %% 以上程序遵循如下MIT许可
+# @title MIT License
+#
+# Copyright (c) 2017 François Chollet
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
