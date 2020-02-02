@@ -8,8 +8,8 @@
 使用TFHub下载预训练模型实现迁移学习，并使用NN进行简单的褒贬文本分类
 
 (working...)
-### 1.4 [基础回归](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/BasicRegression.py)
-使用keras从 [UCI机器学习库](https://archive.ics.uci.edu/ml/index.php) 中获取auto-mpg汽车性能数据集并使用NN进行简单的线性回归
+### 1.4 [BasicRegression 基础回归](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/BasicRegression.py)
+使用keras.utils.get_file从 [UCI机器学习库](https://archive.ics.uci.edu/ml/index.php) 中获取auto-mpg汽车性能数据集并使用NN进行简单的线性回归
 
 数据进行了清理、拆分、统计、特征标签分离、归一化等操作，并使用seaborn绘图库绘制联合分布图
 
