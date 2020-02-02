@@ -29,7 +29,7 @@ train_validation_split = tfds.Split.TRAIN.subsplit([6, 4])
     name="imdb_reviews",
     split=(train_validation_split, tfds.Split.TEST),
     as_supervised=True,
-    data_dir="D:\\HomePC\\dataset\\tensorflow_datasets",
+    data_dir="D:\\HomePC\\dataset\\tensorflow_datasets\\downloads\\aclImdb\\aclImdb\\",
     download=False)
 
 # %% 探索数据
