@@ -6,6 +6,7 @@
 # %% 导包并下载所需数据
 import tensorflow as tf
 
+# %%
 AUTOTUNE = tf.data.experimental.AUTOTUNE  # 可以让程序自动的选择最优的线程并行个数
 
 # %% 下载数据（亦可自行下载，只需使data_root正确获取路径即可）
@@ -115,9 +116,9 @@ import matplotlib.pyplot as plt
 image_path = all_image_paths[0]
 label = all_image_labels[0]
 
-plt.imshow(load_and_preprocess_image(img_path))
+plt.imshow(load_and_preprocess_image(image_path))
 plt.grid(False)
-plt.xlabel(caption_image(img_path))
+plt.xlabel(caption_image(image_path))
 plt.title(label_names[label].title())
 plt.show()
 print()
@@ -129,4 +130,59 @@ path_ds = tf.data.Dataset.from_tensor_slices(all_image_paths)
 print(path_ds)
 
 # 创建一个新的数据集，在路径数据集上映射preprecess_image来动态加载和格式化图片
+# TensorSliceDataset.map(map_func, num_parallel_calls)
+# 从切片的字符串数组（路径）中，对对应的图片使用map_func进行处理后映射
+# num_parallel_calls表示多线程的线程数
 image_ds = path_ds.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
+
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 8))
+for n, image in enumerate(image_ds.take(4)):
+    plt.subplot(2, 2, n + 1)
+    plt.imshow(image)
+    plt.grid(False)
+    plt.xticks([])
+    plt.yticks([])
+    plt.xlabel(caption_image(all_image_paths[n]))
+
+plt.show()
+
+# %% 使用同样的切片方法得到标签数据集
+label_ds = tf.data.Dataset.from_tensor_slices(tf.cast(all_image_labels, tf.int64))
+
+for label in label_ds.take(10):
+    print(label_names[label.numpy()])
+
+# %% 标签数据集与图片数据集具有相同顺序，使用zip()打包
+image_label_ds = tf.data.Dataset.zip((image_ds, label_ds))
+print(image_label_ds)
+
+# %% 针对两个有序数组，也可直接打包
+ds = tf.data.Dataset.from_tensor_slices((all_image_paths, all_image_labels))
+
+
+# 元祖元素被分别解压缩，并映射到函数的参数中
+def load_and_preprocess_from_path_label(path, label):
+    return load_and_preprocess_image(path), label
+
+
+image_label_ds = ds.map(load_and_preprocess_from_path_label)
+image_label_ds
+
+# %% 训练方法
+# 打乱训练集、将训练集分割为batch、batch间不重复、batch尽快提供
+# 使用 tf.data api 实现上述功能
+BATCH_SIZE = 32
+
+# 设置一个和数据集一样大小的 shuffle buffer size （随机缓冲区大小）
+# 保证数据被充分打乱
+
+image_count = len(all_image_paths)
+ds = image_label_ds.shuffle(buffer_size=image_count)
+ds = ds.repeat()
+ds = ds.batch(BATCH_SIZE)
+
+ds = ds.prefetch(buffer_size=AUTOTUNE)
+ds
+
