@@ -173,16 +173,160 @@ image_label_ds
 # %% 训练方法
 # 打乱训练集、将训练集分割为batch、batch间不重复、batch尽快提供
 # 使用 tf.data api 实现上述功能
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 
 # 设置一个和数据集一样大小的 shuffle buffer size （随机缓冲区大小）
 # 保证数据被充分打乱
 
 image_count = len(all_image_paths)
-ds = image_label_ds.shuffle(buffer_size=image_count)
-ds = ds.repeat()
-ds = ds.batch(BATCH_SIZE)
+ds = image_label_ds.shuffle(buffer_size=image_count)  # 打乱数据
+ds = ds.repeat()  # 使数据不断重复
+ds = ds.batch(BATCH_SIZE)  # 每次batch取多少数据
 
+ds = ds.prefetch(buffer_size=AUTOTUNE)  # 模型训练时，数据集在后台取得batch
+ds
+
+# 打乱时需要注意顺序，repeat之后shuffle，会在epoch之间打乱数据
+# 即，会改变每个epoch中的元素，可能导致数据重复出现
+# 在batch之后shuffle，会打乱batch的顺序，但不会打乱batch中的数据
+# 较大的buffer_size缓冲区提供更好的初始化，但占用更多内存
+# 从缓冲区拉去元素前，要先填满缓冲区，缓冲区过大可能引起延迟
+# 缓冲区完全为空之前，被打乱的数据集不会反回数据集的结尾
+# 故使用repeat重新启动数据集时，缓冲区为空，需要重新填满
+# %% 融合shuffle与repeat过程以降低延迟
+ds = image_label_ds.apply(
+    tf.data.experimental.shuffle_and_repeat(buffer_size=image_count))
+ds = ds.batch(BATCH_SIZE)
 ds = ds.prefetch(buffer_size=AUTOTUNE)
 ds
 
+# %% 传递数据集至模型
+# 使用一个简单的迁移学习
+mobile_net = tf.keras.applications.MobileNetV2(input_shape=(192, 192, 3), include_top=False)
+mobile_net.trainable = False
+
+# %% 检查模型需要的输入与输出
+import keras_applications
+
+help(keras_applications.mobilenet_v2.preprocess_input)
+
+# %% 将图片映射到对应区间（似乎现在不需要）
+# def change_range(image, label):
+#     return 2 * image - 1, label
+#
+#
+# keras_ds = ds.map(change_range)
+
+# %% 启动一个batch的数据集
+# 数据集可能需要几秒来启动，因为要填满其随机缓冲区。
+# image_batch, label_batch = next(iter(keras_ds))
+image_batch, label_batch = next(iter(ds))
+
+# %% 传递一个batch的图片给这个模型，查看结果，预期输出(BATCH_SIZE, 6, 6, 1280)
+feature_map_batch = mobile_net(image_batch)
+print(feature_map_batch.shape)
+
+# %% 构建模型，在模型最后添加空间池化与全连接层
+model = tf.keras.Sequential([
+    mobile_net,
+    tf.keras.layers.GlobalAveragePooling2D(),
+    tf.keras.layers.Dense(len(label_names), activation='softmax')])
+
+# %% 试验模型
+# model.summary()
+logit_batch = model(image_batch).numpy()  # 相当于跑了前向传播？
+
+print("min logit:", logit_batch.min())
+print("max logit:", logit_batch.max())
+print()
+
+print("Shape:", logit_batch.shape)
+# %% 编译模型
+model.compile(optimizer=tf.keras.optimizers.Adam(),
+              loss='sparse_categorical_crossentropy',
+              metrics=["accuracy"])
+
+# Dense层中的W与b是可训练的，迁移学习模型中的权重设置为不可训练以加快训练速度
+len(model.trainable_variables)
+model.summary()
+
+# %% 每个epoch需要进行的迭代次数steps_pre_epoch
+# iteration：1次迭代，每次迭代更新1次网络参数（training step）
+# batch_size：每次迭代所使用的的样本量
+# epoch：1个epoch即遍历1次整个样本
+
+# steps_per_epoch：以现在的batch_size。完成一个epoch需要多少个training step
+steps_per_epoch = tf.math.ceil(len(all_image_paths) / BATCH_SIZE).numpy()
+steps_per_epoch
+
+# %% 训练模型
+model.fit(ds, epochs=1, steps_per_epoch=3)  # 在这里只运行3次迭代，作为演示
+
+# %% 提升性能
+# 以上方式使用了简单的pipeline，在每个epoch中单独读取每个文件
+# 在进行GPU或分布训练时可能不适用
+
+# 量化性能
+import time
+
+default_timeit_steps = 2 * steps_per_epoch + 1
+
+
+def timeit(ds, steps=default_timeit_steps):
+    overall_start = time.time()
+    # 开始计时之前
+    # 取得单个 batch 填充 pipeline（填充随机缓冲区）
+    it = iter(ds.take(steps + 1))  # 创建一个迭代器对象
+    next(it)  # 跳过了第一个元素？
+
+    start = time.time()
+    for i, (images, labels) in enumerate(it):
+        if i % 10 == 0:
+            print('.', end='')
+    print()
+    end = time.time()
+
+    duration = end - start
+    print("{} batches: {} s".format(steps, duration))
+    print("{:0.5f} Images/s".format(BATCH_SIZE * steps / duration))
+    print("Total time: {}s".format(end - overall_start))
+
+
+# %% 量化性能
+ds = image_label_ds.apply(
+    tf.data.experimental.shuffle_and_repeat(buffer_size=image_count))
+ds = ds.batch(BATCH_SIZE).prefetch(buffer_size=AUTOTUNE)
+
+# %%
+timeit(ds)
+
+
+# %% test
+def print_tf(tf_data_dataset):
+    i = 0
+    for _ in tf_data_dataset:
+        if i >= 10:
+            break
+        tf.print(_)
+        i += 1
+
+
+# steps = 2 * steps_per_epoch + 1
+# print(steps_per_epoch)
+# print(steps)
+# ds.take(1)
+# list(ds)
+dataset = tf.data.Dataset.range(10)  # 创建一个Dataset
+# dataset = dataset.shuffle(buffer_size=10)  # 打乱
+dataset = dataset.repeat()  # 重复
+# dataset = dataset.apply(  # 将Dataset打乱并不断往复，合并函数，可提升性能
+#     tf.data.experimental.shuffle_and_repeat(buffer_size=10))
+dataset = dataset.batch(2)  # 每个batch取两个元素，即每次取2个元素
+# 从dataset中预先取出元素，在处理当前元素时取出之后的元素
+dataset = dataset.prefetch(buffer_size=AUTOTUNE)
+# %%
+print_tf(next(iter(dataset)))
+# it = iter(dataset.take(5))
+# print(it)
+# next(it)
+# print(it)
