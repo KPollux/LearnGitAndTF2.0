@@ -1,19 +1,3 @@
-- [LearnGitAndTF2.0](#learngitandtf20)
-  * [1 TF.Keras基础](#1-tfkeras--)
-    + [1.1 [MNIST_NN](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/MNIST_NN.py)](#11--mnist-nn--https---githubcom-kpollux-learngitandtf20-blob-master-mnist-nnpy-)
-    + [1.2 [FashionMNIST_NN](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/FashionMNIST_NN.py)](#12--fashionmnist-nn--https---githubcom-kpollux-learngitandtf20-blob-master-fashionmnist-nnpy-)
-    + [1.3 [TFHub与文本分类](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/TFHub_TextClassification.py)](#13--tfhub-------https---githubcom-kpollux-learngitandtf20-blob-master-tfhub-textclassificationpy-)
-    + [1.4 [BasicRegression 基础回归](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/BasicRegression.py)](#14--basicregression-------https---githubcom-kpollux-learngitandtf20-blob-master-basicregressionpy-)
-  * [2 图片](#2---)
-    + [2.1 [Image_CNN 图片的加载与预处理](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/Image_CNN.py)](#21--image-cnn------------https---githubcom-kpollux-learngitandtf20-blob-master-image-cnnpy-)
-      - [2.1.1 图片的加载与预处理](#211----------)
-      - [2.1.2 将数据处理为batch，方便训练时取用](#212-------batch--------)
-      - [2.1.3 模型编辑与训练](#213--------)
-      - [2.1.4 使用缓存提升数据集的磁盘读取性能](#214-----------------)
-  * [代码来源/参考](#-------)
-
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
-
 # LearnGitAndTF2.0
 ## 1 TF.Keras基础
 ### 1.1 [MNIST_NN](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/MNIST_NN.py)
