@@ -133,6 +133,8 @@ print(path_ds)
 # TensorSliceDataset.map(map_func, num_parallel_calls)
 # 从切片的字符串数组（路径）中，对对应的图片使用map_func进行处理后映射
 # num_parallel_calls表示多线程的线程数
+# 根据路径映射图片，将图片地址传递到预处理函数，并返回与path相同顺序的处理好的图片
+# 若不进行预处理，直接调用tf.io.read_file即可
 image_ds = path_ds.map(load_and_preprocess_image, num_parallel_calls=AUTOTUNE)
 
 import matplotlib.pyplot as plt
@@ -292,14 +294,60 @@ def timeit(ds, steps=default_timeit_steps):
     print("Total time: {}s".format(end - overall_start))
 
 
-# %% 量化性能
+# %% 1、量化性能（将数据集读入内存）
 ds = image_label_ds.apply(
     tf.data.experimental.shuffle_and_repeat(buffer_size=image_count))
 ds = ds.batch(BATCH_SIZE).prefetch(buffer_size=AUTOTUNE)
+ ds
+# %% 不进行缓存
+timeit(ds)
+'''
+461.0 batches: 30.93036127090454 s
+238.47119 Images/s
+Total time: 71.98370790481567s
+'''
+
+# %% 2、提升性能
+# 使用tf.data.Dataset.cache在epoch之间缓存计算结果
+# 使用内存缓存的一个缺点是必须在每次运行时重建缓存，这使得每次启动数据集时有相同的启动延迟：
+# 在内存能够完全容纳数据集时尤为有效
+ds = image_label_ds.cache()  # 将预处理之后的图片缓存下来
+ds = image_label_ds.apply(
+    tf.data.experimental.shuffle_and_repeat(buffer_size=image_count))
+ds = ds.batch(BATCH_SIZE).prefetch(buffer_size=AUTOTUNE)
+ds
+# %% 加上缓存操作
+timeit(ds)
+'''
+461.0 batches: 45.37748336791992 s
+162.54758 Images/s
+Total time: 62.68772792816162s
+*本机仅8G内存，效果不明显
+'''
+# %% 如果内存不够容纳数据，创建一个缓存文件
+# 使用缓存文件可快速重启数据集，无需重建缓存
+ds = image_label_ds.cache(filename='./cache.tf-data')  # 当前路径
+ds = ds.apply(
+  tf.data.experimental.shuffle_and_repeat(buffer_size=image_count))
+ds = ds.batch(BATCH_SIZE).prefetch(1)
+ds
+
+# %% 使用缓存文件（缓存文件体积较大）
+timeit(ds)
+''' 
+第一次：
+461.0 batches: 17.65989112854004 s
+417.66962 Images/s
+Total time: 48.12729525566101s
+第二次：
+461.0 batches: 15.639491558074951 s
+471.62659 Images/s
+Total time: 23.122214794158936s
+'''
+
 
 # %%
-timeit(ds)
-
+# TODO(): TFRecord，使用远程GSC服务器时需要用到的性能提升技巧
 
 # %% test
 def print_tf(tf_data_dataset):
