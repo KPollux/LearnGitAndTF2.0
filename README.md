@@ -1,5 +1,6 @@
 # LearnGitAndTF2.0
 ## 1 TF.Keras基础
+<details>
 ### 1.1 [MNIST_NN](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/MNIST_NN.py)
 手写数字识别，使用keras.models.Sequential()构建模型
 ### 1.2 [FashionMNIST_NN](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/FashionMNIST_NN.py)
@@ -22,6 +23,7 @@
 检视训练过程，发现验证集误差在一定epoch后不降反升，使用early_stop回调函数来提前终止训练过程以达到较好效果（防止过拟合）
 
 最后对测试集的数据进行预测，并可视化以查看拟合曲线与误差分布。
+</details>
 
 ## 2 图片
 ### 2.1 [Image_CNN 图片的加载与预处理](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/Image_CNN.py)
