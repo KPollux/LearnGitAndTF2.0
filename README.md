@@ -1,6 +1,7 @@
 # LearnGitAndTF2.0
 ## 1 TF.Keras基础
 <details>
+  
 ### 1.1 [MNIST_NN](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/MNIST_NN.py)
 手写数字识别，使用keras.models.Sequential()构建模型
 ### 1.2 [FashionMNIST_NN](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/FashionMNIST_NN.py)
@@ -26,6 +27,8 @@
 </details>
 
 ## 2 图片
+<details>
+
 ### 2.1 [Image_CNN 图片的加载与预处理](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/Image_CNN.py)
 #### 2.1.1 图片的加载与预处理
 1. 使用`keras.utils.get_file()`下载花卉图片数据
@@ -62,6 +65,7 @@ print(feature_map_batch.shape)
 - iteration：1次迭代，每次迭代更新1次网络参数（training step）
 - batch_size：每次迭代所使用的的样本量
 - epoch：1个epoch即遍历1次整个样本
+</details>
 
 ------------------------------------------------------------------------------------------
 ## 代码来源/参考
