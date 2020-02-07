@@ -11,6 +11,8 @@
 
 (working...)
 ### 1.4 [BasicRegression 基础回归](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/BasicRegression.py)
+<details>
+  
 使用`keras.utils.get_file`从 [UCI机器学习库](https://archive.ics.uci.edu/ml/index.php) 中获取auto-mpg汽车性能数据集并使用NN进行简单的线性回归
 
 数据进行了清理、拆分、统计、特征标签分离、归一化等操作，并使用seaborn绘图库绘制联合分布图
@@ -25,11 +27,14 @@
 
 最后对测试集的数据进行预测，并可视化以查看拟合曲线与误差分布。
 </details>
+</details>
 
 ## 2 图片
 <details>
 
 ### 2.1 [Image_CNN 图片的加载与预处理](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/Image_CNN.py)
+<details>
+
 #### 2.1.1 图片的加载与预处理
 1. 使用`keras.utils.get_file()`下载花卉图片数据
 2. 对图片数据进行一系列文件操作，包括解压--读入--显示
@@ -65,6 +70,7 @@ print(feature_map_batch.shape)
 - iteration：1次迭代，每次迭代更新1次网络参数（training step）
 - batch_size：每次迭代所使用的的样本量
 - epoch：1个epoch即遍历1次整个样本
+</details>
 </details>
 
 ------------------------------------------------------------------------------------------
