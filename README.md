@@ -1,21 +1,18 @@
-- [LearnGitAndTF2.0](#learngitandtf20)
-  - [1 TF.Keras基础](#1-tfkeras基础)
-    - [1.1 MNIST_NN](#11-mnist_nn)
-    - [1.2 FashionMNIST_NN](#12-fashionmnist_nn)
-    - [1.3 TFHub与文本分类](#13-tfhub与文本分类)
-    - [1.4 BasicRegression 基础回归](#14-basicregression-基础回归)
-  - [2 图片](#2-图片)
-    - [2.1 Image_CNN 图片的加载与预处理](#21-image_cnn-图片的加载与预处理)
-      - [2.1.1 图片的加载与预处理](#211-图片的加载与预处理)
-      - [2.1.2 将数据处理为batch，方便训练时取用](#212-将数据处理为batch，方便训练时取用)
-      - [2.1.3 模型编辑与训练](#213-模型编辑与训练)
-      - [2.1.4 使用缓存提升数据集的磁盘读取性能](#214-使用缓存提升数据集的磁盘读取性能)
-  - [代码来源/参考](#代码来源-参考)
+- [1 TF.Keras基础](#1-tfkeras基础)
+  - [1.1 MNIST_NN](#11-mnist_nn)
+  - [1.2 FashionMNIST_NN](#12-fashionmnist_nn)
+  - [1.3 TFHub与文本分类](#13-tfhub与文本分类)
+  - [1.4 BasicRegression 基础回归](#14-basicregression-基础回归)
+- [2 图片](#2-图片)
+  - [2.1 Image_CNN 图片的加载与预处理](#21-image_cnn-图片的加载与预处理)
+    - [2.1.1 图片的加载与预处理](#211-图片的加载与预处理)
+    - [2.1.2 将数据处理为batch，方便训练时取用](#212-将数据处理为batch方便训练时取用)
+    - [2.1.3 模型编辑与训练](#213-模型编辑与训练)
+    - [2.1.4 使用缓存提升数据集的磁盘读取性能](#214-使用缓存提升数据集的磁盘读取性能)
+- [代码来源/参考](#代码来源参考)
 
 # LearnGitAndTF2.0
 ## 1 TF.Keras基础
-<details>
-  
 ### 1.1 [MNIST_NN](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/MNIST_NN.py)
 手写数字识别，使用keras.models.Sequential()构建模型
 ### 1.2 [FashionMNIST_NN](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/FashionMNIST_NN.py)
@@ -25,8 +22,6 @@
 
 (working...)
 ### 1.4 [BasicRegression 基础回归](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/BasicRegression.py)
-<details>
-  
 使用`keras.utils.get_file`从 [UCI机器学习库](https://archive.ics.uci.edu/ml/index.php) 中获取auto-mpg汽车性能数据集并使用NN进行简单的线性回归
 
 数据进行了清理、拆分、统计、特征标签分离、归一化等操作，并使用seaborn绘图库绘制联合分布图
@@ -40,15 +35,8 @@
 检视训练过程，发现验证集误差在一定epoch后不降反升，使用early_stop回调函数来提前终止训练过程以达到较好效果（防止过拟合）
 
 最后对测试集的数据进行预测，并可视化以查看拟合曲线与误差分布。
-</details>
-</details>
-
 ## 2 图片
-<details>
-
 ### 2.1 [Image_CNN 图片的加载与预处理](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/Image_CNN.py)
-<details>
-
 #### 2.1.1 图片的加载与预处理
 1. 使用`keras.utils.get_file()`下载花卉图片数据
 2. 对图片数据进行一系列文件操作，包括解压--读入--显示
@@ -84,19 +72,19 @@ print(feature_map_batch.shape)
 - iteration：1次迭代，每次迭代更新1次网络参数（training step）
 - batch_size：每次迭代所使用的的样本量
 - epoch：1个epoch即遍历1次整个样本
-</details>
-</details>
-
 ------------------------------------------------------------------------------------------
 ## 代码来源/参考
 [1] [怎么写md](https://www.jianshu.com/p/f378e3f2e7e1)
 
-[2] [TensorFlow2.x 官方教程](https://tensorflow.google.cn/tutorials/)
+[2] [Github .md目录生成](https://github.com/KPollux/TOC_generator)
 
-[3] [Keras 官方文档](https://keras.io/zh/)
+[3] [TensorFlow2.x 官方教程](https://tensorflow.google.cn/tutorials/)
 
-[4] [matplotlib.pyplot 官方文档](https://matplotlib.org/index.html)
+[4] [Keras 官方文档](https://keras.io/zh/)
 
-[5] [Pandas 官方文档](https://pandas.pydata.org/pandas-docs/stable/reference/index.html)
+[5] [matplotlib.pyplot 官方文档](https://matplotlib.org/index.html)
 
-[6] [Seaborn 官方文档](http://seaborn.pydata.org/tutorial.html)
+[6] [Pandas 官方文档](https://pandas.pydata.org/pandas-docs/stable/reference/index.html)
+
+[7] [Seaborn 官方文档](http://seaborn.pydata.org/tutorial.html)
+
