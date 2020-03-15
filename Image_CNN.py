@@ -35,7 +35,6 @@ random.shuffle(all_image_paths)  # 打乱顺序
 # all_image_paths[:10]
 
 # %% 检查图片--处理图片路径
-import os
 
 attributions = (data_root / "LICENSE.txt").open(encoding='utf-8').readlines()[4:]  # 将LICENSE中的文字从第4行开始读入
 attributions = [line.split(' CC-BY') for line in attributions]  # 将内容以' CC-BY'分割，两两一组放入元组中
@@ -298,7 +297,7 @@ def timeit(ds, steps=default_timeit_steps):
 ds = image_label_ds.apply(
     tf.data.experimental.shuffle_and_repeat(buffer_size=image_count))
 ds = ds.batch(BATCH_SIZE).prefetch(buffer_size=AUTOTUNE)
- ds
+ds
 # %% 不进行缓存
 timeit(ds)
 '''
