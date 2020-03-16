@@ -137,6 +137,7 @@ print(feature_map_batch.shape)
 - 7 训练数据
 - 8 验证模型
 - 9 绘制边界图（可选）
+
 ![image](https://github.com/KPollux/LearnGitAndTF2.0/blob/master/images/decisionBoundray_87%25preSex.png)
 
 
