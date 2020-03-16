@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 
 # %% 读取数据
+
+
 dataset_path = "./dataset/student.xls"
 
 print(dataset_path)
@@ -41,8 +43,8 @@ plt.scatter(dataset.loc[dataset['Male'] == 0]['Height'],
             dataset.loc[dataset['Male'] == 0]['Weight'], c='red')
 plt.legend(['male', 'female'])
 plt.show()
-# %% 由于训练集太少，取90%训练集，10%测试集
-train_dataset = dataset.sample(frac=0.9, random_state=0)
+# %% 取80%训练集，20%测试集
+train_dataset = dataset.sample(frac=0.8, random_state=0)
 test_dataset = dataset.drop(train_dataset.index)
 '''
 len(dataset)  # 260
@@ -53,7 +55,6 @@ len(test_dataset)  # 26
 train_stats = train_dataset.describe()  # 包含每列的计数、均值、标准差、最小值、最大值等信息
 train_stats.pop("Male")
 train_stats = train_stats.transpose()
-# %%
 print(train_stats)
 '''
         count        mean        std    min      25%     50%      75%    max
@@ -63,7 +64,6 @@ Weight  234.0   65.482479  12.659946   39.3   55.700   62.95   74.225  107.2
 # %% 从标签中分离需要预测的特征
 train_labels = train_dataset.pop('Male')
 test_labels = test_dataset.pop('Male')
-# %%
 print(train_labels.tail(3))  # 数据带有序号
 '''
 77     1.0
@@ -98,19 +98,16 @@ plt.legend(['male', 'female'])
 plt.show()
 # %% 构建模型
 model = tf.keras.Sequential([
-    # 第一层全连接层，64个隐藏单元，激活函数为relu，输入维度为train_dataset的数据个数（==2）
-    tf.keras.layers.Dense(8, activation=tf.nn.softmax, input_shape=[len(train_dataset.keys())]),
+    # 第一层全连接层，16个隐藏单元,relu作为激活函数，输入维度为train_dataset的数据个数（==2）
+    tf.keras.layers.Dense(16, activation=tf.nn.relu, input_shape=[len(train_dataset.keys())]),
     # 第二层相似，二元分类时考虑使用sigmoid激活函数
-    # tf.keras.layers.Dense(4),
+    tf.keras.layers.Dense(8, activation=tf.nn.sigmoid),
     # 输出层
     tf.keras.layers.Dense(1)
 ])
 
-# optimizer = tf.keras.optimizers.RMSprop(0.001)  # 使用RMSProp有助更快收敛，训练步长初始化为0.001
-optimizer = tf.keras.optimizers.SGD(0.05)
-
 model.compile(loss='binary_crossentropy',
-              optimizer=optimizer,
+              optimizer='adam',
               metrics=['accuracy'])
 
 model.summary()
@@ -130,7 +127,7 @@ class PrintDot(tf.keras.callbacks.Callback):
 
 
 # 防止过拟合，如果10轮都没有改进，则停止
-early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=10)
+early_stop = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=10)
 
 # 训练1000轮
 EPOCH = 1000
@@ -163,7 +160,6 @@ def plot_history(history):
              label='Train Accuracy')  # 以批次为横坐标，mae为纵坐标，并制定图例名称
     plt.plot(hist['epoch'], hist['val_accuracy'],
              label='Val Accuracy')
-    # plt.ylim([0, 5])
     plt.legend()  # 加上图例
     plt.show()
 
@@ -173,55 +169,24 @@ plot_history(history)
 # %% 验证模型
 loss, acc = model.evaluate(normed_test_data, test_labels, verbose=1)
 
-print("Testing set acc: {:5.2f} Sexual".format(acc))  # Testing set acc:  0.92 Sexual
+# 数据量太少，打乱的随机性会直接影响到训练结果，最好的一次结果为92%
+print("Testing set acc: {:5.2f} Sexual".format(acc))  # Testing set acc:  0.87 Sexual
 
-
-# %% TODO() 绘制决策边界
-def produce_random_data(u_x, d_x, u_y, d_y, num):
-    X1 = np.random.uniform(u_x, d_x, num)
-    X2 = np.random.uniform(u_y, d_y, num)
-    X = np.vstack((X1, X2))
-    return X.transpose()
-
-
-def collect_boundary_data(v_xs):
-    global prediction
-    X = np.empty([1, 2])
-    X = list()
-    for i in range(len(v_xs)):
-        x_input = v_xs[i]
-        x_input.shape = [1, 2]
-        # y_pre = sess.run(prediction, feed_dict={xs: x_input})
-        y_pre = model.predict(x_input)
-        if abs(y_pre - 0) < 0.5:
-            X.append(v_xs[i])
-    return np.array(X)
-
-
-# 产生空间随机数据
-X_NUM = produce_random_data(-3, 3, -3, 4, 5000)
-# 边界数据采样
-# X_b = collect_boundary_data(X_NUM)
-# # 画出数据
-# fig = plt.figure()
-# ax = fig.add_subplot(1, 1, 1)
-# # 设置坐标轴名称
-# plt.xlabel('x1')
-# plt.ylabel('x2')
-# plt.xlabel('Height')
-# plt.ylabel('Weight')
-# plt.scatter(normed_train_data.loc[train_labels == 1]['Height'],
-#             normed_train_data.loc[train_labels == 1]['Weight'], c='blue')
-# plt.scatter(normed_train_data.loc[train_labels == 0]['Height'],
-#             normed_train_data.loc[train_labels == 0]['Weight'], c='red')
-# plt.legend(['male', 'female'])
-# # 用采样的边界数据拟合边界曲线 7次曲线最佳
-# z1 = np.polyfit(X_b[:, 0], X_b[:, 1], 7)
-# p1 = np.poly1d(z1)
-# x = X_b[:, 0]
-# x.sort()
-# yvals = p1(x)
-# plt.plot(x, yvals, 'r', label='boundray line')
-# plt.legend(loc=4)
-# # plt.ion()
-# plt.show()
+# ==================================结束========================================
+# %% 保存模型
+# model.save('./model/sexual.h5')
+# %% 绘制决策边界
+# 非作业要求
+# from drawDecisionBoundray import *
+# # %% 给定上下界，生成随机坐标
+# X_NUM = produce_random_data(max(normed_train_data['Height']),
+#                             min(normed_train_data['Height']),
+#                             max(normed_train_data['Weight']),
+#                             min(normed_train_data['Weight']),
+#                             num=5000)
+#
+# # %% 根据模型挑选出决策边界附近的点
+# X_b = collect_boundary_data(model, X_NUM)
+# # %% 根据这些点，拟合出决策边界
+# draw_decision_boundary(X_b, normed_train_data, train_labels,
+#                        label1='male', label2='female')
